@@ -138,7 +138,13 @@ public void spawnWolves() {
     }
 }
 
-// Scoring system which calculates score that is increased if you have more lives
+ /**
+     * Calculates the player's score based on remaining lives and current stage.
+     * The score is determined by multiplying the remaining lives and the stage number.
+     * @param remainingLives The number of lives that the player has.
+     * @param currentStage   The current stage the player is on.
+     * @return The calculated player score based on remaining lives and current stage.
+     */
 public int calculatePlayerScore(int remainingLives, int currentStage) {
     return remainingLives * currentStage;}
     
@@ -163,7 +169,7 @@ public int calculatePlayerScore(int remainingLives, int currentStage) {
         image(imgWand, fltBunnyX + 52, fltBunnyY + 20);
         }
 
-        // Display the score
+        // Display the score from the method
         int playerScore = calculatePlayerScore(intLives, currentStage);
         fill(255);
         textSize(20);
@@ -181,8 +187,7 @@ public int calculatePlayerScore(int remainingLives, int currentStage) {
             float eggY = eggYPosition.get(a);
 
             // Check if there is a collision
-            if (eggX > wolfX && eggX < wolfX + imgWolf.width &&
-                eggY > wolfY && eggY < wolfY + imgWolf.height) {
+            if (eggX > wolfX && eggX < wolfX + imgWolf.width && eggY > wolfY && eggY < wolfY + imgWolf.height) {
 
                 // Remove the egg
                 eggXPosition.remove(a);
