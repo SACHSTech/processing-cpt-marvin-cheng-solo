@@ -24,8 +24,8 @@ public class Sketch extends PApplet {
 
 
     int intLives = 5;
-    int currentStage = 1; // Initial stage
-    int wolvesInCurrentStage = 2; // Initial wolves in the current stage
+    int currentStage = 1; 
+    int wolvesInCurrentStage = 2; 
     boolean eggShoot = false;
     boolean title = true;
     boolean wolfShoot = false;
@@ -65,27 +65,51 @@ public class Sketch extends PApplet {
       imgTitle = loadImage("titlescreen.png");
       imgTitle.resize(width, height);   
       for (int i = 0; i < wolvesInCurrentStage; i++) {
-        float wolfX = width - imgWolf.width; // Adjust this position as needed
+        float wolfX = width - imgWolf.width; 
         float wolfY = random(0, height - imgWolf.height);
-        float wolfXMovement = random(-2, -1); // Adjust the initial velocity as needed
-        float wolfYMovement = random(-1, 1); // Adjust the initial velocity as needed
+        float wolfXMovement = random(-2, -1); 
+        float wolfYMovement = random(-1, 1); 
         wolfXPosition.add(wolfX);
         wolfYPosition.add(wolfY);
         wolfXMove.add(wolfXMovement);
         wolfYMove.add(wolfYMovement);
   }
 }
-
   /**
-   * Called repeatedly, anything drawn to the screen goes here
-   */
+     * Called repeatedly, anything drawn to the screen goes here
+     */
   public void draw() {
-      if (title) {
-          drawLoadingScreen();
-      } else {
-          drawGameScreen();
-      }
-  }
+    if (title) {
+        drawLoadingScreen();
+    } else {
+        drawGameScreen();
+        checkStageCompletion(); 
+    }
+}
+
+public void checkStageCompletion() {
+    if (wolvesInCurrentStage == 0) {
+        currentStage++;
+
+        wolvesInCurrentStage += 2;
+
+        
+        spawnWolves();
+    }
+}
+
+public void spawnWolves() {
+    for (int i = 0; i < wolvesInCurrentStage; i++) {
+        float wolfX = width - imgWolf.width; 
+        float wolfY = random(0, height - imgWolf.height);
+        float wolfXMovement = random(-2, -1); 
+        float wolfYMovement = random(-1, 1); 
+        wolfXPosition.add(wolfX);
+        wolfYPosition.add(wolfY);
+        wolfXMove.add(wolfXMovement);
+        wolfYMove.add(wolfYMovement);
+    }
+}
 
   public void drawLoadingScreen() {
       // Set the background  
@@ -101,7 +125,7 @@ public class Sketch extends PApplet {
   }
   public void mousePressed() {
     if (title) {
-        // Check if the mouse is pressed within a specific region for starting the game
+        // Check if the mouse is pressed within a specific part of the screen
         if (mouseX > width / 2 - 215 && mouseX < width / 2 + 215 && mouseY > height - 100 && mouseY < height - 10) {
             title = false;
         }
@@ -114,13 +138,13 @@ public class Sketch extends PApplet {
         image(imgWand, fltBunnyX + 67, fltBunnyY + 26);
 
         
-    // Draw wolves and their movements
+    // Draw wolves and movement
     for (int i = wolvesInCurrentStage - 1; i >= 0; i--) {
         float wolfX = wolfXPosition.get(i);
         float wolfY = wolfYPosition.get(i);
 
         // Check for collisions between eggs and wolves
-        boolean wolfHit = false; // Flag to track if this wolf got hit
+        boolean wolfHit = false;
 
         for (int a = eggXPosition.size() - 1; a >= 0; a--) {
             float eggX = eggXPosition.get(a);
@@ -134,21 +158,21 @@ public class Sketch extends PApplet {
                 eggXPosition.remove(a);
                 eggYPosition.remove(a);
 
-                // Mark this wolf as hit
+                // Mark this wolf as hit and remove it
                 wolfHit = true;
-                break; // No need to check further eggs for this wolf
+                break; 
             }
         }
 
-        // Draw wolf only if it wasn't hit
+        // Draw wolf only if it is not hit
         if (!wolfHit) {
             image(imgWolf, wolfX, wolfY);
 
-            // Adjust wolf positions based on velocities
+            // Adjust wolf positions 
             wolfX += wolfXMove.get(i);
             wolfY += wolfYMove.get(i);
 
-            // Check for screen boundaries, and reverse direction if necessary
+            // Check for screen boundaries
             if (wolfX < 550 || wolfX > width - imgWolf.width) {
                 wolfXMove.set(i, wolfXMove.get(i) * -1);
             }
@@ -157,7 +181,7 @@ public class Sketch extends PApplet {
                 wolfYMove.set(i, wolfYMove.get(i) * -1);
             }
 
-            // Update the positions in the lists
+            // Update positions
             wolfXPosition.set(i, wolfX);
             wolfYPosition.set(i, wolfY);
         } else {
