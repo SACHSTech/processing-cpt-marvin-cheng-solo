@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 public class Sketch extends PApplet {
 
+    // List the variables in the code
     PImage imgBackground;
     PImage imgBunny;
     PImage imgCarpet;
@@ -12,6 +13,7 @@ public class Sketch extends PApplet {
     PImage imgWolf;
     PImage imgBullet;
     PImage imgTitle;
+    PImage imgLives;
 
     boolean wPressed = false;
     boolean sPressed = false;
@@ -19,17 +21,15 @@ public class Sketch extends PApplet {
     boolean aPressed = false;
     float fltBunnyX;
     float fltBunnyY;
-    float fltWandX;
-    float fltWandY;
-
 
     int intLives = 5;
     int currentStage = 1; 
-    int wolvesInCurrentStage = 2; 
+    int wolvesInCurrentStage = 1; 
     boolean eggShoot = false;
     boolean title = true;
     boolean wolfShoot = false;
     boolean collision = false;
+    boolean gameOver = false;
     ArrayList<Float> eggXPosition = new ArrayList<>();
     ArrayList<Float> eggYPosition = new ArrayList<>();
     ArrayList<Float> bulletXPosition = new ArrayList<>();
@@ -44,7 +44,7 @@ public class Sketch extends PApplet {
      * Called once at the beginning of execution, put your size call here
      */
     public void settings() {
-      size(945, 600);
+      size(945, 590);
   }
 
   /**
@@ -53,17 +53,19 @@ public class Sketch extends PApplet {
   public void setup() {
       imgBackground = loadImage("Background.png");
       imgBunny = loadImage("Bunnyshoot.png");
-      imgBunny.resize(imgBunny.width / 3, imgBunny.height / 3);
+      imgBunny.resize(imgBunny.width / 4, imgBunny.height / 4);
       imgEgg = loadImage("egg.png");
       imgEgg.resize(imgEgg.width / 7, imgEgg.height / 7);
       imgWand = loadImage("wand.png");
-      imgWand.resize(imgWand.width / 8, imgWand.height / 8);
+      imgWand.resize(imgWand.width / 11, imgWand.height / 11);
       imgWolf = loadImage("wolf.png");
-      imgWolf.resize(imgWolf.width / 4, imgWolf.height / 4);
+      imgWolf.resize(imgWolf.width / 5, imgWolf.height / 5);
       imgBullet = loadImage("bullet.png");
-      imgBullet.resize(imgBullet.width / 10, imgBullet.height / 10);
+      imgBullet.resize(imgBullet.width / 15, imgBullet.height / 15);
       imgTitle = loadImage("titlescreen.png");
       imgTitle.resize(width, height);   
+      imgLives = loadImage("lives.png");
+      imgLives.resize(imgLives.width / 35, imgLives.height / 35);
       for (int i = 0; i < wolvesInCurrentStage; i++) {
         float wolfX = width - imgWolf.width; 
         float wolfY = random(0, height - imgWolf.height);
@@ -78,26 +80,23 @@ public class Sketch extends PApplet {
   /**
      * Called repeatedly, anything drawn to the screen goes here
      */
-  public void draw() {
-    if (title) {
-        drawLoadingScreen();
-    } else {
-        drawGameScreen();
-        checkStageCompletion(); 
+    public void draw() {
+        if (title) {
+            drawLoadingScreen();
+        } else {
+            drawGameScreen();
+            checkStageCompletion();
+        }
     }
-}
-
+// Check for amount of wolves in the stage and spawn them according to the stage number
 public void checkStageCompletion() {
     if (wolvesInCurrentStage == 0) {
         currentStage++;
-
-        wolvesInCurrentStage += 2;
-
-        
+        wolvesInCurrentStage = currentStage;
         spawnWolves();
     }
 }
-
+// Spawn wolves and define their movement
 public void spawnWolves() {
     for (int i = 0; i < wolvesInCurrentStage; i++) {
         float wolfX = width - imgWolf.width; 
@@ -112,32 +111,64 @@ public void spawnWolves() {
 }
 
   public void drawLoadingScreen() {
+
       // Set the background  
       background(imgTitle);
 
       fill(255);
       rect(width / 2 - 208, height - 100, 430, 80, 10);
         
-      // The start button
+      // Start button 
       fill(255, 0, 0);
       textSize(32);
       text("Start", width / 2 - 30, height - 50);
   }
   public void mousePressed() {
+
     if (title) {
         // Check if the mouse is pressed within a specific part of the screen
         if (mouseX > width / 2 - 215 && mouseX < width / 2 + 215 && mouseY > height - 100 && mouseY < height - 10) {
             title = false;
         }
-      }
+    } else if (gameOver) {
+        // Check if the mouse is pressed on the restart button
+        if (mouseX > width / 2 - 50 && mouseX < width / 2 + 50 && mouseY > height / 2 + 100 && mouseY < height / 2 + 140) {
+            restartGame();
+        }
     }
+}
+
+// Scoring system which calculates score that is increased if you have more lives
+public int calculatePlayerScore(int remainingLives, int currentStage) {
+    return remainingLives * currentStage;}
+    
     public void drawGameScreen() {
+
+        // Check if game is over
+        if (gameOver) {
+        drawGameOverScreen();
+        }
+        else{
+         if (intLives <= 0) {
+            gameOver = true;
+        }
+        {
+
+        //generate the bunny, background, and wnad within the game along with stating the stage number
+
         background(255);
         image(imgBackground, 0, 0);
+        text("Stage: " + currentStage, width / 2 - 30, 30);
         image(imgBunny, fltBunnyX, fltBunnyY);
-        image(imgWand, fltBunnyX + 67, fltBunnyY + 26);
+        image(imgWand, fltBunnyX + 52, fltBunnyY + 20);
+        }
 
-        
+        // Display the score
+        int playerScore = calculatePlayerScore(intLives, currentStage);
+        fill(255);
+        textSize(20);
+        text("Score: " + playerScore, width / 2 + 145, 29);
+
     // Draw wolves and movement
     for (int i = wolvesInCurrentStage - 1; i >= 0; i--) {
         float wolfX = wolfXPosition.get(i);
@@ -145,7 +176,6 @@ public void spawnWolves() {
 
         // Check for collisions between eggs and wolves
         boolean wolfHit = false;
-
         for (int a = eggXPosition.size() - 1; a >= 0; a--) {
             float eggX = eggXPosition.get(a);
             float eggY = eggYPosition.get(a);
@@ -158,7 +188,7 @@ public void spawnWolves() {
                 eggXPosition.remove(a);
                 eggYPosition.remove(a);
 
-                // Mark this wolf as hit and remove it
+                // Mark the wolf as hit and remove it
                 wolfHit = true;
                 break; 
             }
@@ -193,12 +223,53 @@ public void spawnWolves() {
             wolvesInCurrentStage--;
         }
     }
-        
+        // Draw the lives
         fill(255, 0, 0);
         for (int i = 0; i < intLives; i++) {
-            rect(10 + i * 30, 10, 20, 20);
+            image(imgLives, 10 + i * 30, 10);
+        }
+    // Draw wolves and their bullet shooting
+    for (int i = wolvesInCurrentStage - 1; i >= 0; i--) {
+        float wolfX = wolfXPosition.get(i);
+        float wolfY = wolfYPosition.get(i);
+
+        // Draw wolf
+        image(imgWolf, wolfX, wolfY);
+
+        // Check for bullets and the speed at rate of fire from the wolves
+        if (frameCount % 90 == 0) {
+            float wolfBulletX = wolfX;
+            float wolfBulletY = wolfY + imgWolf.height / 2;
+            bulletXPosition.add(wolfBulletX);
+            bulletYPosition.add(wolfBulletY);
+        }
+    }
+
+    // Draw wolf bullets and their movements
+    for (int i = bulletXPosition.size() - 1; i >= 0; i--) {
+        float wolfBulletX = bulletXPosition.get(i);
+        float wolfBulletY = bulletYPosition.get(i);
+        image(imgBullet, wolfBulletX, wolfBulletY);
+
+        // Move the bullet
+        wolfBulletX -= 4; 
+        bulletXPosition.set(i, wolfBulletX);
+
+        // Remove bullets that go off the screen
+        if (wolfBulletX < 0) {
+            bulletXPosition.remove(i);
+            bulletYPosition.remove(i);
         }
 
+        // Check for collisions between bunny excluding magic carpet and bullets
+        if (dist(fltBunnyX + imgBunny.width / 4, fltBunnyY + imgBunny.height / 4, wolfBulletX, wolfBulletY) < imgBunny.width / 4 + imgBullet.width / 4) {
+            intLives--;
+
+            // Remove the bullet
+            bulletXPosition.remove(i);
+            bulletYPosition.remove(i);
+        }
+    }
         // Draw eggs and their movements
         for (int i = 0; i < eggXPosition.size(); i++) {
             float eggX = eggXPosition.get(i);
@@ -215,19 +286,23 @@ public void spawnWolves() {
                 eggYPosition.remove(i);
             }
         }
+        // Movement & edge detection along with keeping the bunny on the left half of the screen
         if (wPressed && fltBunnyY >= 0) {
             fltBunnyY -= 3;
         }
-        if (sPressed && fltBunnyY <= height - 150) {
+        if (sPressed && fltBunnyY <= height - 100) {
             fltBunnyY += 3;
         }
-        if (aPressed && fltBunnyX >= +10) {
+        if (aPressed && fltBunnyX >= + 15) {
             fltBunnyX -= 3;
         }
-        if (dPressed && fltBunnyX <= width - 140) {
+        if (dPressed && fltBunnyX <= width - 550) {
             fltBunnyX += 3;
         }
       }
+    }   
+
+    // Check if w,a,s,d keys or space bar are pressed and execute accordingly
     public void keyPressed() {
         if (key == 'W' || key == 'w') {
             wPressed = true;
@@ -246,6 +321,7 @@ public void spawnWolves() {
         }
     }
 
+    // Check if w,a,s,d keys or space bar are pressed and execute accordingly
     public void keyReleased() {
         if (key == 'W' || key == 'w') {
             wPressed = false;
@@ -258,5 +334,39 @@ public void spawnWolves() {
         } else if (key == ' ') {
             eggShoot = false;
         }
-      }
     }
+
+    // Generate the game over screen when the player loses
+    public void drawGameOverScreen() {
+        background(255);
+
+        fill(255, 0, 0);
+        textSize(40);
+        textAlign(CENTER, CENTER);
+        text("Game Over", width / 2, height / 2 - 50);
+        textSize(20);
+        fill(100, 255, 0);
+        rect(width / 2 - 50, height / 2 + 99, 100, 46, 10);
+        fill(150);
+        textSize(18);
+        textAlign(CENTER, CENTER);
+        text("Restart", width / 2, height / 2 + 120);
+    }
+
+    // Restart game if desired
+    public void restartGame() {
+        intLives = 5;
+        currentStage = 1;
+        wolvesInCurrentStage = 1;
+        gameOver = false;
+        eggXPosition.clear();
+        eggYPosition.clear();
+        bulletXPosition.clear();
+        bulletYPosition.clear();
+        wolfXPosition.clear();
+        wolfYPosition.clear();
+        wolfXMove.clear();
+        wolfYMove.clear();
+        spawnWolves();
+    }
+}
